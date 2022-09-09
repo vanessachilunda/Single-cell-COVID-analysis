@@ -1,0 +1,369 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+####load the packages
+library(Seurat)
+library(ggplot2)
+library(cowplot)
+library(reticulate)
+library(dplyr)
+library(devtools)
+library(knitr)
+library(png)
+library(gplots)
+library(RColorBrewer)
+library(heatmap3)
+library(tidyverse)
+library(RCurl)
+library(readr)
+library(patchwork)
+#install.packages('BiocManager')
+library(BiocManager)
+#BiocManager::install('multtest')
+library(multtest)
+#install.packages('metap')
+library(metap)
+
+#BiocManager::install('limma')
+library(limma)
+options(future.globals.maxSize =16000 * 1024^3)
+
+##load merged file
+samples.merge <- readRDS(file = "~/Desktop/Covid analysis/VC healthy covid pbmc/covid healthy monocytes merged.rds")
+##Look to see how many cells are for each group 
+table(Idents(samples.merge))
+
+####confirm that there is no cell contamination before integration
+CD16_expression = GetAssayData(object = samples.merge, assay = "RNA", slot = "data")["FCGR3A",]
+CD3_expression = GetAssayData(object = samples.merge, assay = "RNA", slot = "data")["CD3E",]
+CD57_expression = GetAssayData(object = samples.merge, assay = "RNA", slot = "data")["B3GAT1",]
+
+pos_ids = names(which(CD16_expression>0 & CD3_expression==0 & CD57_expression==0))
+samples.merge.subset = subset(samples.merge,cells=pos_ids)
+table(Idents(samples.merge.subset))
+
+rm(samples.merge)
+DefaultAssay(samples.merge.subset) <- "RNA"
+samples.merge.subset
+samples.merge.subset[["SCT"]]<- NULL
+samples.merge.subset #to check default assay is RNA
+
+table(Idents(samples.merge.subset))
+
+
+samples.merge.list <- SplitObject(samples.merge.subset, split.by = "sample")
+
+
+samples.merge.list
+samples.merge.list[["Healthy Sample 5c"]]<- NULL
+samples.merge.list[["Cov2 Sample 9c"]]<- NULL
+samples.merge.list[["Healthy Sample 6c"]]<- NULL
+samples.merge.list[["Healthy Sample 8c"]]<- NULL
+samples.merge.list
+
+rm(samples.merge.subset)
+
+for (i in 1:length(samples.merge.list)){
+  samples.merge.list[[i]] <- SCTransform(samples.merge.list[[i]], vars.to.regress = "percent.mt", return.only.var.genes = FALSE, verbose = FALSE)}
+
+
+saveRDS(object = samples.merge.list, "~/Desktop/Covid analysis/VC healthy covid pbmc/after quality control covid healthy monocytes mergedlist.rds")
+
+#samples.merge.list <- readRDS(file= "~/Desktop/Covid analysis/VC healthy covid pbmc/after quality control covid healthy monocytes mergedlist.rds")
+samples.merge.list
+genes.to.integrate <- Reduce(intersect, lapply(samples.merge.list, rownames))
+genes.to.integrate
+
+#select features for downstream integration, and run PrepSCTIntegration, which ensures that all necessary Pearson residuals have been calculated then #Identify anchors and integrate the datasets 
+#(Commands are identical to the standard workflow but make sure to set normalization.method = 'SCT')
+#look at the number of genes in gene to integrate and put this number as the nfeature in select integration features
+samples.merge.features <- SelectIntegrationFeatures(object.list = samples.merge.list, nfeatures = 943) #use 3000 or genes.to.integrate #nfeautures is the number of genes to integrate
+
+samples.merge.list <- PrepSCTIntegration(object.list = samples.merge.list, anchor.features = samples.merge.features, verbose = FALSE)
+
+k.filter <- min(200, min(sapply(samples.merge.list, ncol)))
+
+reference_dataset <- which(names(samples.merge.list) == "Healthy Sample 10X")
+samples.merge.anchors <- FindIntegrationAnchors(object.list = samples.merge.list, normalization.method = "SCT", 
+                                                anchor.features = samples.merge.features, reference = reference_dataset,
+                                                dims = 1:30,  k.anchor = 5, k.filter = k.filter, k.score = 30, verbose = FALSE) 
+
+
+
+#tried different k values from k.filter = 200; and k.score =30.  #dims = 1:20,1:30,  k.anchor = 5, k.filter = 20, k.score = 20, worked previously
+
+
+samples.integrated <- IntegrateData(anchorset = samples.merge.anchors, normalization.method = "SCT", dims = 1:30, k.weight = k.filter, verbose = FALSE) 
+
+
+saveRDS(object = samples.integrated, "~/Desktop/Covid analysis/VC healthy covid pbmc/after quality control covid healthy monocytes integrated.rds")
+
+######after integration
+samples.integrated <- readRDS(file="~/Desktop/Covid analysis/VC healthy covid pbmc/after quality control covid healthy monocytes integrated.rds")
+rm(samples.merge.features, genes.to.integrate, samples.merge.anchors, samples.merge.list,i,k.filter)
+rm(CD16_expression,CD3_expression,CD57_expression,pos_ids,reference_dataset)
+
+
+DefaultAssay(samples.integrated) <- "integrated"
+samples.integrated <- ScaleData(samples.integrated, verbose = FALSE) 
+samples.integrated <- RunPCA(samples.integrated, verbose = FALSE)
+DimPlot(object = samples.integrated, reduction = "pca", group.by = "sample")
+
+####to determine whether there is batch effect
+Idents(samples.integrated) <- "sample"
+table(samples.integrated@meta.data$sample)
+paper1 <- subset(samples.integrated, idents=c("Cov2 Sample 1","Cov2 Sample 2","Cov2 Sample 7","Healthy Sample 1","Healthy Sample 3","Healthy Sample 4"))
+p1 <- DimPlot(object = paper1, reduction = "pca", group.by = "sample")
+
+paper2 <- subset(samples.integrated, idents=c("Cov2 Sample 1b","Cov2 Sample 4b","Cov2 Sample 5b","Cov2 Sample 7b","Cov2 Sample 8b","Healthy Sample 1b","Healthy Sample 2b","Healthy Sample 3b","Healthy Sample 4b"))
+p2 <- DimPlot(object = paper2, reduction = "pca", group.by = "sample")
+
+paper3_cohort1 <- subset(samples.integrated, idents=c("Cov2 Sample 1c","Cov2 Sample 2c","Cov2 Sample 3c","Cov2 Sample 4c","Cov2 Sample 5c","Healthy Sample 10c","Healthy Sample 11c","Healthy Sample 12c","Healthy Sample 13c","Healthy Sample 15c",
+                                              "Healthy Sample 16c","Healthy Sample 17c","Healthy Sample 1c","Healthy Sample 2c"))
+p3 <- DimPlot(object = paper3_cohort1, reduction = "pca", group.by = "sample")
+
+paper3_cohort2 <- subset(samples.integrated, idents=c("Cov2 Sample 2d","Cov2 Sample 1d"))
+p4 <- DimPlot(object = paper3_cohort2, reduction = "pca", group.by = "sample")
+
+data10X <- subset(samples.integrated, idents=c("Healthy Sample 10X"))
+p5 <- DimPlot(object = data10X, reduction = "pca", group.by = "sample")
+
+plot_grid(p1, p2, p3, p4, p5)
+
+DimPlot(object = samples.integrated, reduction = "pca", group.by = "sample")
+
+#it does not seem that the sources of variation are per sample by looking at this figure
+
+ElbowPlot(object = samples.integrated, ndims = 30)
+
+#by looking at the previous plot it looks like the most significant PCs are around 10
+
+#While this gives us a good rough idea of the number of PCs to include, a more quantitative approach may be a bit more reliable. 
+#We will identify a PC threshold by calculating where the principal components start to elbow by taking the larger value of:
+#The point where the principal components only contribute 5% of standard deviation and the principal components cumulatively contribute 90% of the standard deviation.
+#The point where the percent change in variation between the consecutive PCs is less than 0.1%.
+
+# Determine percent of variation associated with each PC
+pct <- samples.integrated[["pca"]]@stdev / sum(samples.integrated[["pca"]]@stdev) * 100
+
+# Calculate cumulative percents for each PC
+cumu <- cumsum(pct)
+
+# Determine which PC exhibits cumulative percent greater than 90% and % variation associated with the PC as less than 5
+co1 <- which(cumu > 90 & pct < 5)[1]
+
+co1
+
+#The first metric returns PC43 as the PC matching these requirements. 
+#Let’s check the second metric, which identifies the PC where the percent change in variation between consequtive PCs is less than 0.1%:
+
+# Determine the difference between variation of PC and subsequent PC
+co2 <- sort(which((pct[1:length(pct) - 1] - pct[2:length(pct)]) > 0.1), decreasing = T)[1] + 1
+
+# last point where change of % of variation is more than 0.1%.
+
+co2
+
+#The second metric returned PC16. Now, to determine the selection of PCs, we will use the minimum of the two metrics:
+
+# Minimum of the two calculation
+pcs <- min(co1, co2)
+
+pcs
+
+
+#Based on these metrics, for the clustering of cells in Seurat we will use the first 8 PCs to generate the clusters. 
+#We can plot the elbow plot again and overlay the information determined using our metrics
+
+# Create a dataframe with values
+plot_df <- data.frame(pct = pct, 
+                      cumu = cumu, 
+                      rank = 1:length(pct))
+
+# Elbow plot to visualize 
+ggplot(plot_df, aes(cumu, pct, label = rank, color = rank > pcs)) + 
+  geom_text() + 
+  geom_vline(xintercept = 90, color = "grey") + 
+  geom_hline(yintercept = min(pct[pct > 5]), color = "grey") +
+  theme_bw()
+
+#However, it’s often a good idea to check the genes associated with some higher PCs to make sure that other PCs shouldn’t be included 
+#due to association with some rarer cell populations.
+
+
+# Printing out the most variable genes driving PCs
+print(x = samples.integrated[["pca"]], 
+      dims = 1:20, 
+      nfeatures = 5)
+
+
+#If we saw the highest positive and negative PCA scores for genes associated with a particular PC corresponding to known marker genes for a rare cell type, 
+#then we would include all PCs up to that one.
+
+#PCA,UMAP and tSNE 10 pcs dimensions
+
+DefaultAssay(samples.integrated) <- "integrated"
+samples.integrated <- RunPCA(samples.integrated, npcs = 8, verbose = FALSE)
+samples.integrated <- FindNeighbors(samples.integrated, dims = 1:8, nn.eps = 0.5, verbose = FALSE)
+
+###try different resolutions first before deciding
+samples.integrated<- FindClusters(samples.integrated, resolution = c(0.4), verbose = FALSE)#play with resolution
+levels(samples.integrated)
+
+samples.integrated <- RunUMAP(samples.integrated, reduction = "pca", dims = 1:8)
+samples.integrated <- RunTSNE(samples.integrated, reduction = "pca")
+
+levels(samples.integrated) ##decided on 0.4 
+
+#res=0.6, levels = 0-6
+#res=0.5, levels = 0-5
+#res 0.4 levels 0-3
+#res=0.3, levels = 0-3
+#res=0.2, levels = 0-2
+
+saveRDS(object = samples.integrated, "~/Desktop/Covid analysis/VC healthy covid pbmc/healthy covid monocytesintegratedwithresolution after qc before integration.rds")
+
+samples.integrated <- readRDS(file= "~/Desktop/Covid analysis/VC healthy covid pbmc/healthy covid monocytesintegratedwithresolution after qc before integration.rds")
+
+
+####confirm identities
+Idents(samples.integrated) <- "sample"
+Idents(samples.integrated) <- "stim"
+Idents(samples.integrated) <- "condition"
+Idents(samples.integrated) <- "seurat_clusters"
+table(Idents(samples.integrated))
+
+#PCA,UMAP and tSNE 8 pcs dimensions
+Idents(samples.integrated)
+levels(samples.integrated)
+
+
+####visualization of clusters and samples 
+
+DimPlot(samples.integrated, reduction = "tsne", pt.size = 0.5, group.by = "sample")
+DimPlot(samples.integrated, reduction = "umap", pt.size = 1, group.by = "sample")
+DimPlot(object = samples.integrated, reduction = "umap", group.by = "seurat_clusters",pt.size = 1.0, 
+        label.size=5, label = TRUE, repel = TRUE)
+
+
+
+DimPlot(object = samples.integrated, reduction = "umap", group.by = "stim", label.size=8,pt.size =1.5)
+DimPlot(object = samples.integrated, reduction = "tsne", group.by = "stim", label.size=8, pt.size =0.5)
+#DimPlot(object = samples.integrated, reduction = "umap", group.by = "cluster.stim", pt.size =1)
+dev.off()
+
+DimPlot(samples.integrated, reduction = "umap", split.by = "stim", pt.size=1.0)
+DimPlot(samples.integrated, reduction = "tsne", split.by = "stim")
+
+
+DimPlot(samples.integrated, reduction = "umap", split.by = "condition", pt.size=1.0)
+DimPlot(samples.integrated, reduction = "umap", split.by = "stim", pt.size=1.0)
+DimPlot(samples.integrated, reduction = "umap", split.by = "sample", pt.size=1.0)
+
+p1 <- DimPlot(samples.integrated, reduction = "umap", group.by = "stim", pt.size =0.5)
+p2 <- DimPlot(samples.integrated, reduction = "umap", group.by = "seurat_clusters",label.size=5, pt.size =1.0, label = TRUE)
+plot_grid(p1, p2)
+
+
+# Extract identity and sample information from seurat object to determine the number of cells per cluster per sample
+DefaultAssay(samples.integrated) <- "integrated"
+Idents(samples.integrated) <- "seurat_clusters"
+table(Idents(samples.integrated))
+n_cells <- FetchData(samples.integrated, 
+                     vars = c("ident", "stim")) %>%
+  dplyr::count(ident, stim) %>%
+  tidyr::spread(ident, n)
+
+# View table
+View(n_cells)
+
+###per condition
+Idents(samples.integrated) <- "condition"
+table(Idents(samples.integrated))
+
+##identify conserved cell type markers
+DefaultAssay(samples.integrated) <- "RNA"
+samples.integrated <- NormalizeData(samples.integrated, verbose = FALSE) 
+levels(samples.integrated)
+
+###find differentually expressed genes per condition
+
+Idents(samples.integrated) <- "stim"
+levels(samples.integrated)
+healthy.covid.markers <- FindMarkers(samples.integrated, grouping.var = "stim", ident.1 = "Cov2", ident.2 = "Healthy", verbose = FALSE)
+
+head(healthy.covid.markers)
+write.csv(healthy.covid.markers, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration covid healthy markers 1104.csv")
+
+##cluster response
+theme_set(theme_cowplot())
+DefaultAssay(samples.integrated) <- "RNA"
+levels(samples.integrated)
+Idents(samples.integrated) <- "seurat_clusters"
+levels(samples.integrated)
+samples.integrated$celltype.stim <- paste(Idents(samples.integrated), samples.integrated$stim, sep = "_")
+samples.integrated$celltype <- Idents(samples.integrated)
+Idents(samples.integrated) <- "seurat_clusters"
+Idents(samples.integrated) <- "celltype.stim"
+levels(samples.integrated)
+cluster0response <- FindMarkers(samples.integrated, ident.1 = "0_Cov2", ident.2 = "0_Healthy", verbose = FALSE)
+head(cluster0response, n = 15)
+
+cluster1response <- FindMarkers(samples.integrated, ident.1 = "1_Cov2", ident.2 = "1_Healthy", verbose = FALSE)
+head(cluster1response, n = 15)
+
+cluster2response <- FindMarkers(samples.integrated, ident.1 = "2_Cov2", ident.2 = "2_Healthy", verbose = FALSE)
+head(cluster2response, n = 15)
+
+cluster3response <- FindMarkers(samples.integrated, ident.1 = "3_Cov2", ident.2 = "3_Healthy", verbose = FALSE)
+head(cluster3response, n = 15)
+
+#cluster4response <- FindMarkers(samples.integrated, ident.1 = "4_Cov2", ident.2 = "4_Healthy", verbose = FALSE)
+#head(cluster4response, n = 15)
+
+
+write.csv(cluster0response, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration cluster 0 markers by stim Cov2 vs healthy 1103.csv")
+write.csv(cluster1response, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration cluster 1 markers by stim Cov2 vs healthy 1103.csv")
+write.csv(cluster2response, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration cluster 2 markers by stim Cov2 vs healthy 1103.csv")
+write.csv(cluster3response, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration cluster 3 markers by stim Cov2 vs healthy 1103.csv")
+#write.csv(cluster4response, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration cluster 4 markers by stim Cov2 vs healthy 1103.csv")
+
+
+###find differentially expressed genes per condition healthy vs mild vs severe
+theme_set(theme_cowplot())
+DefaultAssay(samples.integrated) <- "RNA"
+levels(samples.integrated)
+Idents(samples.integrated) <- "condition"
+levels(samples.integrated)
+table(Idents(samples.integrated))
+mild.severe.markers <- FindMarkers(samples.integrated, grouping.var = "condition", ident.1 = "Mild", ident.2 = "Severe", verbose = FALSE)
+severe.mild.markers <- FindMarkers(samples.integrated, grouping.var = "condition", ident.1 = "Severe", ident.2 = "Mild", verbose = FALSE)
+severe.mild.healthy.markers <- FindMarkers(samples.integrated, grouping.var = "condition", ident.1 = "Severe", ident.2 = c("Mild","Healthy"), verbose = FALSE)
+mild.healthy.markers <- FindMarkers(samples.integrated, grouping.var = "condition", ident.1 = "Mild", ident.2 = "Healthy", verbose = FALSE)
+severe.healthy.markers <- FindMarkers(samples.integrated, grouping.var = "condition", ident.1 = "Severe", ident.2 = "Healthy", verbose = FALSE)
+
+write.csv(mild.severe.markers, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration mild severe markers 1104.csv")
+write.csv(severe.mild.healthy.markers, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration severe vs mild and healthy markers 1104.csv")
+write.csv(severe.mild.markers, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration severe mild markers 1104.csv")
+write.csv(mild.healthy.markers, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration mild healthy markers 1104.csv")
+write.csv(severe.healthy.markers, file = "~/Desktop/Covid analysis/VC healthy covid pbmc/csv files/qc before integration severe healthy markers 1104.csv")
+
+WhichCells(samples.integrated, expression = RNA28S5)
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

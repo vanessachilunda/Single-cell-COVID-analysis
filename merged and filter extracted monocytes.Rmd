@@ -1,0 +1,781 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+#####load covid data from the papers. Check the number of monocytes and decides samples to include. 
+covid_555_1 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Individual donor clustering/covid_551_1_monocytes.rds")
+Idents(covid_555_1)
+Idents(object = covid_555_1) <- "Cov2 Sample 1"
+covid_555_1$sample <- "Cov2 Sample 1"
+covid_555_1$stim <- "Cov2"
+covid_555_1$condition <- "Severe"
+levels(covid_555_1)
+covid_555_1
+
+
+covid_555_2 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Individual donor clustering/covid_555_2_monocytes.rds")
+Idents(covid_555_2)
+Idents(object = covid_555_2) <- "Cov2 Sample 2"
+covid_555_2$sample <- "Cov2 Sample 2"
+covid_555_2$stim <- "Cov2"
+covid_555_2$condition <- "Severe"
+levels(covid_555_2)
+covid_555_2
+
+
+covid_556 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Individual donor clustering/covid_556_monocytes.rds")
+Idents(covid_556)
+Idents(object = covid_556) <- "Cov2 Sample 3"
+covid_556$sample <- "Cov2 Sample 3"
+covid_556$stim <- "Cov2"
+covid_556$condition <- "Severe"
+levels(covid_556)
+covid_556
+
+
+covid_557 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Individual donor clustering/covid_557_monocytes.rds")
+Idents(covid_557)
+Idents(object = covid_557) <- "Cov2 Sample 4"
+covid_557$sample <- "Cov2 Sample 4"
+covid_557$stim <- "Cov2"
+covid_557$condition <- "Severe"
+levels(covid_557)
+covid_557
+
+covid_558 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Individual donor clustering/covid_558_monocytes.rds") #no monocytes
+Idents(covid_558)
+Idents(object = covid_558) <- "Cov2 Sample 5"
+covid_558$sample <- "Cov2 Sample 5"
+covid_558$stim <- "Cov2"
+covid_558$condition <- "Severe"
+levels(covid_558)
+covid_558
+
+covid_559 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Individual donor clustering/covid_559_monocytes.rds")
+Idents(covid_559)
+Idents(object = covid_559) <- "Cov2 Sample 6"
+covid_559$sample <- "Cov2 Sample 6"
+covid_559$stim <- "Cov2"
+covid_559$condition <- "Severe"
+levels(covid_559)
+covid_559
+
+
+covid_561 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Individual donor clustering/covid_561_monocytes.rds")
+Idents(covid_561)
+Idents(object = covid_561) <- "Cov2 Sample 7"
+covid_561$sample <- "Cov2 Sample 7"
+covid_561$stim <- "Cov2"
+covid_561$condition <- "Severe"
+levels(covid_561)
+covid_561
+
+covid1 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Single cell covid 091420/covid1monocytes.rds")
+Idents(covid1)
+Idents(object = covid1) <- "Cov2 Sample 1b"
+covid1$sample <- "Cov2 Sample 1b"
+covid1$stim <- "Cov2"
+covid1$condition <- "Severe"
+levels(covid1)
+covid1
+
+
+covid2 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Single cell covid 091420/covid2monocytes.rds")
+Idents(covid2)
+Idents(object = covid2) <- "Cov2 Sample 2b"
+covid2$sample <- "Cov2 Sample 2b"
+covid2$stim <- "Cov2"
+covid2$condition <- "Mild"
+levels(covid2)
+covid2
+
+
+covid10 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Single cell covid 091420/covid10monocytes.rds")
+Idents(covid10)
+Idents(object = covid10) <- "Cov2 Sample 3b"
+covid10$sample <- "Cov2 Sample 3b"
+covid10$stim <- "Cov2"
+covid10$condition <- "Severe"
+levels(covid10)
+covid10
+
+
+covid11 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Single cell covid 091420/covid11monocytes.rds")
+Idents(covid11)
+Idents(object = covid11) <- "Cov2 Sample 4b"
+covid11$sample <- "Cov2 Sample 4b"
+covid11$stim <- "Cov2"
+covid11$condition <- "Mild"
+levels(covid11)
+covid11
+
+
+covid12 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Single cell covid 091420/covid12monocytes.rds")
+Idents(covid12)
+Idents(object = covid12) <- "Cov2 Sample 5b"
+covid12$sample <- "Cov2 Sample 5b"
+covid12$stim <- "Cov2"
+covid12$condition <- "Mild"
+levels(covid12)
+covid12
+
+
+covid18 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Single cell covid 091420/covid18monocytes.rds")
+Idents(covid18)
+Idents(object = covid18) <- "Cov2 Sample 7b"
+covid18$sample <- "Cov2 Sample 7b"
+covid18$stim <- "Cov2"
+covid18$condition <- "Mild"
+levels(covid18)
+covid18
+
+covid20 <- readRDS(file = "~/Desktop/Covid analysis/VC start/Single cell covid 091420/covid20monocytes.rds")
+Idents(covid20)
+Idents(object = covid20) <- "Cov2 Sample 8b"
+covid20$sample <- "Cov2 Sample 8b"
+covid20$stim <- "Cov2"
+covid20$condition <- "Mild"
+levels(covid20)
+covid20
+
+###load healthy monocytes from pbmc samples from the two papers
+normal5 <- readRDS(file = "/Users/bermanlab/Desktop/Covid analysis/PM folder/Covid_flu paper extract healthy monocytes 091620/normal5monocytes.rds")
+Idents(normal5)
+Idents(object = normal5) <- "Healthy Sample 1b"
+normal5$sample <- "Healthy Sample 1b"
+normal5$stim <- "Healthy"
+normal5$condition <- "Healthy"
+levels(normal5)
+normal5
+
+normal13 <- readRDS(file = "/Users/bermanlab/Desktop/Covid analysis/PM folder/Covid_flu paper extract healthy monocytes 091620/normal13monocytes.rds")
+Idents(normal13)
+Idents(object = normal13) <- "Healthy Sample 2b"
+normal13$sample <- "Healthy Sample 2b"
+normal13$stim <- "Healthy"
+normal13$condition <- "Healthy"
+levels(normal13)
+normal13
+
+normal14 <- readRDS(file = "/Users/bermanlab/Desktop/Covid analysis/PM folder/Covid_flu paper extract healthy monocytes 091620/normal14monocytes.rds")
+Idents(normal14)
+Idents(object = normal14) <- "Healthy Sample 3b"
+normal14$sample <- "Healthy Sample 3b"
+normal14$stim <- "Healthy"
+normal14$condition <- "Healthy"
+levels(normal14)
+normal14
+
+normal19 <- readRDS(file = "/Users/bermanlab/Desktop/Covid analysis/PM folder/Covid_flu paper extract healthy monocytes 091620/normal19monocytes.rds")
+Idents(normal19)
+Idents(object = normal19) <- "Healthy Sample 4b"
+normal19$sample <- "Healthy Sample 4b"
+normal19$stim <- "Healthy"
+normal19$condition <- "Healthy"
+levels(normal19)
+normal19
+
+HIP002 <- readRDS(file = "~/Desktop/Covid analysis/VC start/HIP002_monocytes.rds")
+Idents(HIP002)
+Idents(object = HIP002) <- "Healthy Sample 1"
+HIP002$sample <- "Healthy Sample 1"
+HIP002$stim <- "Healthy"
+HIP002$condition <- "Healthy"
+levels(HIP002)
+HIP002
+
+HIP015 <- readRDS(file = "~/Desktop/Covid analysis/VC start/HIP015_monocytes.rds")
+Idents(HIP015)
+Idents(object = HIP015) <- "Healthy Sample 2"
+HIP015$sample <- "Healthy Sample 2"
+HIP015$stim <- "Healthy"
+HIP015$condition <- "Healthy"
+levels(HIP015)
+HIP015
+
+HIP043 <- readRDS(file = "~/Desktop/Covid analysis/VC start/HIP043_monocytes.rds")
+Idents(HIP043)
+Idents(object = HIP043) <- "Healthy Sample 3"
+HIP043$sample <- "Healthy Sample 3"
+HIP043$stim <- "Healthy"
+HIP043$condition <- "Healthy"
+levels(HIP043)
+HIP043
+
+HIP044 <- readRDS(file = "~/Desktop/Covid analysis/VC start/HIP044_monocytes.rds")
+Idents(HIP044)
+Idents(object = HIP044) <- "Healthy Sample 4"
+HIP044$sample <- "Healthy Sample 4"
+HIP044$stim <- "Healthy"
+HIP044$condition <- "Healthy"
+levels(HIP044)
+HIP044
+
+HIP045 <- readRDS(file = "~/Desktop/Covid analysis/VC start/HIP045_monocytes.rds")
+Idents(HIP045)
+Idents(object = HIP045) <- "Healthy Sample 5"
+HIP045$sample <- "Healthy Sample 5"
+HIP045$stim <- "Healthy"
+HIP045$condition <- "Healthy"
+levels(HIP045)
+HIP045
+
+
+PBMC_10X <- readRDS(file = "~/Desktop/Covid analysis/VC start/monocytes_PBMC_10x.rds")
+Idents(PBMC_10X)
+Idents(object = PBMC_10X) <- "Healthy Sample 10X"
+PBMC_10X$sample <- "Healthy Sample 10X"
+PBMC_10X$stim <- "Healthy"
+PBMC_10X$condition <- "Healthy"
+levels(PBMC_10X)
+PBMC_10X
+
+####load covid data from the papers. Check the number of monocytes and decides samples to include. 
+P17H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P17H_monocytes.rds")
+Idents(P17H)
+Idents(object = P17H) <- "Healthy Sample 1c"
+P17H$sample <- "Healthy Sample 1c"
+P17H$stim <- "Healthy"
+P17H$condition <- "Healthy"
+levels(P17H)
+P17H
+
+P18F <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P18F_monocytes.rds")
+Idents(P18F)
+Idents(object = P18F) <- "Healthy Sample 2c"
+P18F$sample <- "Healthy Sample 2c"
+P18F$stim <- "Healthy"
+P18F$condition <- "Healthy"
+levels(P18F)
+P18F
+
+P20H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P20H_monocytes.rds")
+Idents(P20H)
+Idents(object = P20H) <- "Healthy Sample 3c"
+P20H$sample <- "Healthy Sample 3c"
+P20H$stim <- "Healthy"
+P20H$condition <- "Healthy"
+levels(P20H)
+P20H
+
+P15F <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P15F_monocytes.rds")
+Idents(P15F)
+Idents(object = P15F) <- "Healthy Sample 4c"
+P15F$sample <- "Healthy Sample 4c"
+P15F$stim <- "Healthy"
+P15F$condition <- "Healthy"
+levels(P15F)
+P15F
+
+P08H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P08H_monocytes.rds")
+Idents(P08H)
+Idents(object = P08H) <- "Healthy Sample 5c"
+P08H$sample <- "Healthy Sample 5c"
+P08H$stim <- "Healthy"
+P08H$condition <- "Healthy"
+levels(P08H)
+P08H
+
+P13H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P13H_monocytes.rds")
+Idents(P13H)
+Idents(object = P13H) <- "Healthy Sample 6c"
+P13H$sample <- "Healthy Sample 6c"
+P13H$stim <- "Healthy"
+P13H$condition <- "Healthy"
+levels(P13H)
+P13H
+
+P07H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P07H_monocytes.rds")
+Idents(P07H)
+Idents(object = P07H) <- "Healthy Sample 7c"
+P07H$sample <- "Healthy Sample 7c"
+P07H$stim <- "Healthy"
+P07H$condition <- "Healthy"
+levels(P07H)
+P07H
+
+P06F <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P06F_monocytes.rds")
+Idents(P06F)
+Idents(object = P06F) <- "Healthy Sample 8c"
+P06F$sample <- "Healthy Sample 8c"
+P06F$stim <- "Healthy"
+P06F$condition <- "Healthy"
+levels(P06F)
+P06F
+
+P04H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P04H_monocytes.rds")
+Idents(P04H)
+Idents(object = P04H) <- "Healthy Sample 9c"
+P04H$sample <- "Healthy Sample 9c"
+P04H$stim <- "Healthy"
+P04H$condition <- "Healthy"
+levels(P04H)
+P04H
+
+C2P01H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C2P01H_monocytes.rds")
+Idents(C2P01H)
+Idents(object = C2P01H) <- "Healthy Sample 10c"
+C2P01H$sample <- "Healthy Sample 10c"
+C2P01H$stim <- "Healthy"
+C2P01H$condition <- "Healthy"
+levels(C2P01H)
+C2P01H
+
+P09H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P09H_monocytes.rds")
+Idents(P09H)
+Idents(object = P09H) <- "Healthy Sample 11c"
+P09H$sample <- "Healthy Sample 11c"
+P09H$stim <- "Healthy"
+P09H$condition <- "Healthy"
+levels(P09H)
+P09H
+
+P02H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/P02H_monocytes.rds")
+Idents(P02H)
+Idents(object = P02H) <- "Healthy Sample 12c"
+P02H$sample <- "Healthy Sample 12c"
+P02H$stim <- "Healthy"
+P02H$condition <- "Healthy"
+levels(P02H)
+P02H
+
+C2P05F <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C2P05F_monocytes.rds")
+Idents(C2P05F)
+Idents(object = C2P05F) <- "Healthy Sample 13c"
+C2P05F$sample <- "Healthy Sample 13c"
+C2P05F$stim <- "Healthy"
+C2P05F$condition <- "Healthy"
+levels(C2P05F)
+C2P05F
+
+C2P07H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C2P07H_monocytes.rds")
+Idents(C2P07H)
+Idents(object = C2P07H) <- "Healthy Sample 14c"
+C2P07H$sample <- "Healthy Sample 14c"
+C2P07H$stim <- "Healthy"
+C2P07H$condition <- "Healthy"
+levels(C2P07H)
+C2P07H
+
+C2P13F <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C2P13F_monocytes.rds")
+Idents(C2P13F)
+Idents(object = C2P13F) <- "Healthy Sample 15c"
+C2P13F$sample <- "Healthy Sample 15c"
+C2P13F$stim <- "Healthy"
+C2P13F$condition <- "Healthy"
+levels(C2P13F)
+C2P13F
+
+C2P16H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C2P16H_monocytes.rds")
+Idents(C2P16H)
+Idents(object = C2P16H) <- "Healthy Sample 16c"
+C2P16H$sample <- "Healthy Sample 16c"
+C2P16H$stim <- "Healthy"
+C2P16H$condition <- "Healthy"
+levels(C2P16H)
+C2P16H
+
+C2P10H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C2P10H_monocytes.rds")
+Idents(C2P10H)
+Idents(object = C2P10H) <- "Healthy Sample 17c"
+C2P10H$sample <- "Healthy Sample 17c"
+C2P10H$stim <- "Healthy"
+C2P10H$condition <- "Healthy"
+levels(C2P10H)
+C2P10H
+
+C2P19H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C2P19H_monocytes.rds")
+Idents(C2P19H)
+Idents(object = C2P19H) <- "Healthy Sample 18c"
+C2P19H$sample <- "Healthy Sample 18c"
+C2P19H$stim <- "Healthy"
+C2P19H$condition <- "Healthy"
+levels(C2P19H)
+C2P19H
+
+C2P15H <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C2P15H_monocytes.rds")
+Idents(C2P15H)
+Idents(object = C2P15H) <- "Healthy Sample 19c"
+C2P15H$sample <- "Healthy Sample 19c"
+C2P15H$stim <- "Healthy"
+C2P15H$condition <- "Healthy"
+levels(C2P15H)
+C2P15H
+
+
+#####load the covid samples from berlin
+C19_CB_0001 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0001_monocytes.rds")
+Idents(C19_CB_0001)
+Idents(object = C19_CB_0001) <- "Cov2 Sample 1c"
+C19_CB_0001$sample <- "Cov2 Sample 1c"
+C19_CB_0001$stim <- "Cov2"
+C19_CB_0001$condition <- "Mild"
+levels(C19_CB_0001)
+C19_CB_0001
+
+
+C19_CB_0003 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0003_monocytes.rds")
+Idents(C19_CB_0003)
+Idents(object = C19_CB_0003) <- "Cov2 Sample 2c"
+C19_CB_0003$sample <- "Cov2 Sample 2c"
+C19_CB_0003$stim <- "Cov2"
+C19_CB_0003$condition <- "Mild"
+levels(C19_CB_0003)
+C19_CB_0003
+
+C19_CB_0005 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0005_monocytes.rds")
+Idents(C19_CB_0005)
+Idents(object = C19_CB_0005) <- "Cov2 Sample 3c"
+C19_CB_0005$sample <- "Cov2 Sample 3c"
+C19_CB_0005$stim <- "Cov2"
+C19_CB_0005$condition <- "Mild"
+levels(C19_CB_0005)
+C19_CB_0005
+
+C19_CB_0204 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0204_monocytes.rds")
+Idents(C19_CB_0204)
+Idents(object = C19_CB_0204) <- "Cov2 Sample 4c"
+C19_CB_0204$sample <- "Cov2 Sample 4c"
+C19_CB_0204$stim <- "Cov2"
+C19_CB_0204$condition <- "Mild"
+levels(C19_CB_0204)
+C19_CB_0204
+
+C19_CB_0008 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0008_monocytes.rds")
+Idents(C19_CB_0008)
+Idents(object = C19_CB_0008) <- "Cov2 Sample 5c"
+C19_CB_0008$sample <- "Cov2 Sample 5c"
+C19_CB_0008$stim <- "Cov2"
+C19_CB_0008$condition <- "Severe"
+levels(C19_CB_0008)
+C19_CB_0008
+
+C19_CB_0009 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0009_monocytes.rds")
+Idents(C19_CB_0009)
+Idents(object = C19_CB_0009) <- "Cov2 Sample 6c"
+C19_CB_0009$sample <- "Cov2 Sample 6c"
+C19_CB_0009$stim <- "Cov2"
+C19_CB_0009$condition <- "Severe"
+levels(C19_CB_0009)
+C19_CB_0009
+
+C19_CB_0011 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0011_monocytes.rds")
+Idents(C19_CB_0011)
+Idents(object = C19_CB_0011) <- "Cov2 Sample 7c"
+C19_CB_0011$sample <- "Cov2 Sample 7c"
+C19_CB_0011$stim <- "Cov2"
+C19_CB_0011$condition <- "Severe"
+levels(C19_CB_0011)
+C19_CB_0011
+
+C19_CB_0012 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0012_monocytes.rds")
+Idents(C19_CB_0012)
+Idents(object = C19_CB_0012) <- "Cov2 Sample 8c"
+C19_CB_0012$sample <- "Cov2 Sample 8c"
+C19_CB_0012$stim <- "Cov2"
+C19_CB_0012$condition <- "Severe"
+levels(C19_CB_0012)
+C19_CB_0012
+
+C19_CB_0021 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0021_monocytes.rds")
+Idents(C19_CB_0021)
+Idents(object = C19_CB_0021) <- "Cov2 Sample 9c"
+C19_CB_0021$sample <- "Cov2 Sample 9c"
+C19_CB_0021$stim <- "Cov2"
+C19_CB_0021$condition <- "Severe"
+levels(C19_CB_0021)
+C19_CB_0021
+
+C19_CB_0016 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/C19_CB_0016_monocytes.rds")
+Idents(C19_CB_0016)
+Idents(object = C19_CB_0016) <- "Cov2 Sample 10c"
+C19_CB_0016$sample <- "Cov2 Sample 10c"
+C19_CB_0016$stim <- "Cov2"
+C19_CB_0016$condition <- "Severe"
+levels(C19_CB_0016)
+C19_CB_0016
+
+
+###load bohn data rhapsody
+BN_01 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/Cohort 2 Bonn/BN_01_monocytes.rds")
+Idents(BN_01)
+Idents(object = BN_01) <- "Cov2 Sample 1d"
+BN_01$sample <- "Cov2 Sample 1d"
+BN_01$stim <- "Cov2"
+BN_01$condition <- "Mild"
+levels(BN_01)
+BN_01
+
+BN_04 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/Cohort 2 Bonn/BN_04_monocytes.rds")
+Idents(BN_04)
+Idents(object = BN_04) <- "Cov2 Sample 2d"
+BN_04$sample <- "Cov2 Sample 2d"
+BN_04$stim <- "Cov2"
+BN_04$condition <- "Mild"
+levels(BN_04)
+BN_04
+
+BN_05 <- readRDS(file = "~/Desktop/Covid analysis/Schulte_Schrepping_2020_COVID19_10x_PBMC_data/Cohort 2 Bonn/BN_05_monocytes.rds")
+Idents(BN_05)
+Idents(object = BN_05) <- "Cov2 Sample 3d"
+BN_05$sample <- "Cov2 Sample 3d"
+BN_05$stim <- "Cov2"
+BN_05$condition <- "Mild"
+levels(BN_05)
+BN_05
+
+
+####check how many cells you have in each of the conditions/samples to decide on what samples to proceed with. 
+
+covid_555_1 #113 cells
+covid_555_2 #117 cells
+covid_556 #exclude 29 cells
+covid_558 ##no monocytes exclude
+covid_557 #51 cells exclude
+covid_559 #exclude 14 cells
+covid_561 #262 cells
+
+covid1 #469 cells
+covid2 #33 cells exclude
+covid10 #34 cells exclude
+covid11 #262 cells
+covid12 #169 cells
+covid17 #36 cells exclude
+covid18 #369 cells
+covid20 #595 cells
+
+normal5 #134 cells
+normal13 #377 cells
+normal14 #273 cells
+normal19 #184 cells
+
+HIP002 #244 cells
+HIP015 #89 cells exclude
+HIP043 #247 cells
+HIP044 #487 cells
+HIP045 #70 cells exclude
+
+PBMC_10X ##518 cells
+
+####check how many cells you have in each of the conditions/samples to decide on what samples to proceed with.
+P17H ##116 cells
+P18F ##181 cells
+P20H #42 cells dont use
+P15F ##44 cells dont use
+P08H ##149 cells
+P13H ##106 cells
+P07H #41 cells dont use
+P06F #142 cells
+P04H ##57 cells exclude
+C2P01H ##116 cells
+P09H #106 cells
+P02H ##374 cells
+C2P05F #142 cells
+C2P07H #90 cells exclude
+C2P13F #218 cells
+C2P16H #142 cells
+C2P10H #177 cells
+C2P19H #88 cells exclude
+C2P15H ##33 cells dont use
+
+C19_CB_0001 #568 cells
+C19_CB_0003 #258 cells
+C19_CB_0005 #140 cells
+C19_CB_0204 #166 cells
+C19_CB_0008 #163 cells
+C19_CB_0009 #70 cells exclude
+C19_CB_0011 #23 cells dont use
+C19_CB_0012 #52 cells exclude
+C19_CB_0021 #133 cells
+C19_CB_0016 #38 dont use
+
+BN_01 ##792 cells
+BN_04 ##283 cells
+BN_05 #1412 cells  exclude too many cells
+
+
+####merge and make sure that the number of cells stays the same
+Idents(object = covid_555_1) <- "sample" ##verified, 114 cells
+levels(covid_555_1)
+Idents(object = covid_555_2) <- "sample" ##verified 1130 cells
+levels(covid_555_2)
+#Idents(object = covid_556) <- "sample" ##verified very few monocytes. dont use. 29 cells
+#levels(covid_556)
+#Idents(object = covid_557) <- "sample" ##verified 51 cells
+#levels(covid_557)
+#Idents(object = covid_558) <- "sample" ##verified no mnocytes
+#levels(covid_558)
+#Idents(object = covid_559) <- "sample" ##verified 14 monocytes dont use
+#levels(covid_559)
+Idents(object = covid_561) <- "sample" ###verified 647 monocytes
+levels(covid_561)
+
+Idents(object = covid1) <- "sample" #verified 469 cells
+levels(covid1)
+#Idents(object = covid2) <- "sample" #verified few cells 33 dont use
+#levels(covid2)
+#Idents(object = covid10) <- "sample" #verified few cells 34 dont use
+#levels(covid10)
+Idents(object = covid11) <- "sample" #verified 282 cells
+levels(covid11)
+Idents(object = covid12) <- "sample" #verified 169 cells
+levels(covid12)
+#Idents(object = covid17) <- "sample" #verified no monocytes
+#levels(covid17)
+Idents(object = covid18) <- "sample" #verified 369 cells
+levels(covid18)
+Idents(object = covid20) <- "sample" #verified 595 cells
+levels(covid20)
+
+
+Idents(object = HIP002) <- "sample" #verified
+levels(HIP002)
+#Idents(object = HIP015) <- "sample" # verified cells
+#levels(HIP015)
+Idents(object = HIP043) <- "sample" # 247 verified
+levels(HIP043)
+Idents(object = HIP044) <- "sample" #verified 487
+levels(HIP044)
+#Idents(object = HIP045) <- "sample" #70 monocytes
+#levels(HIP045)
+
+Idents(object = normal5) <- "sample"
+levels(normal5)
+Idents(object = normal13) <- "sample"
+levels(normal13)
+Idents(object = normal14) <- "sample"
+levels(normal14)
+Idents(object = normal19) <- "sample"
+levels(normal19)
+
+Idents(object = PBMC_10X) <- "sample"
+levels(PBMC_10X)
+
+Idents(object = P17H) <- "sample"
+levels(P17H)
+Idents(object = P18F) <- "sample"
+levels(P18F)
+#Idents(object = P20H) <- "sample"
+#levels(P20H)
+#Idents(object = P15F) <- "sample"
+#levels(P15F)
+Idents(object = P08H) <- "sample"
+levels(P08H)
+Idents(object = P13H) <- "sample"
+levels(P13H)
+#Idents(object = P07H) <- "sample"
+#levels(P07H)
+Idents(object = P06F) <- "sample"
+levels(P06F)
+Idents(object = P04H) <- "sample"
+levels(P04H)
+Idents(object = C2P01H) <- "sample"
+levels(C2P01H)
+Idents(object = P09H) <- "sample"
+levels(P09H)
+Idents(object = P02H) <- "sample"
+levels(P02H)
+Idents(object = C2P05F) <- "sample"
+levels(C2P05F)
+Idents(object = C2P07H) <- "sample"
+levels(C2P07H)
+Idents(object = C2P13F) <- "sample"
+levels(C2P13F)
+Idents(object = C2P16H) <- "sample"
+levels(C2P16H)
+Idents(object = C2P10H) <- "sample"
+levels(C2P10H)
+Idents(object = C2P19H) <- "sample"
+levels(C2P19H)
+#Idents(object = C2P15H) <- "sample"
+#levels(C2P15H)
+
+Idents(object = C19_CB_0001) <- "sample"
+levels(C19_CB_0001)
+Idents(object = C19_CB_0003) <- "sample"
+levels(C19_CB_0003)
+Idents(object = C19_CB_0005) <- "sample"
+levels(C19_CB_0005)
+Idents(object = C19_CB_0204) <- "sample"
+levels(C19_CB_0204)
+Idents(object = C19_CB_0008) <- "sample"
+levels(C19_CB_0008)
+Idents(object = C19_CB_0009) <- "sample"
+levels(C19_CB_0009)
+#Idents(object = C19_CB_0011) <- "sample"
+#levels(C19_CB_0011)
+Idents(object = C19_CB_0012) <- "sample"
+levels(C19_CB_0012)
+Idents(object = C19_CB_0021) <- "sample"
+levels(C19_CB_0021)
+#Idents(object = C19_CB_0016) <- "sample"
+#levels(C19_CB_0016)
+
+Idents(object = BN_01) <- "sample"
+levels(BN_01)
+Idents(object = BN_04) <- "sample"
+levels(BN_04)
+#Idents(object = BN_05) <- "sample"
+#levels(BN_05)
+
+##merge
+samples.merge <- merge(x = covid_555_1, y = c(covid_555_2, covid_561,
+                                              covid1,covid11,covid12,covid18,covid20,
+                                              HIP002,HIP043,HIP044,
+                                              normal5,normal13,normal14,normal19,
+                                              P17H,P18F,P08H,P13H,P06F,C2P01H,P09H,P02H, C2P05F,C2P13F,C2P16H,C2P10H,
+                                              C19_CB_0001,C19_CB_0003,C19_CB_0005,C19_CB_0204,C19_CB_0008,C19_CB_0021,
+                                              BN_01,BN_04,
+                                              PBMC_10X))
+
+
+samples.merge
+
+
+levels(samples.merge)
+
+
+####Run a VlnPlot to see that your samples are named appropriately between all samples
+
+VlnPlot(samples.merge, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+
+
+##Look to see how many cells are for each group 
+Idents(samples.merge) <- "sample"
+table(Idents(samples.merge))
+
+
+##save the RDS file for use later 
+#monocytesmerged.rds file does not contain healthy pbmc monocytes
+#uninfected covid healthy monocytes merged file contains all different samples
+#saveRDS(object = samples.merge, "~/Desktop/Covid analysis/VC start/individual donor monocyte intergration/monocytesmerged.rds") 
+#saveRDS(object = samples.merge, "~/Desktop/Covid analysis/VC start/individual donor monocyte intergration/uninfected covid healthy monocytes merged.rds") 
+#saveRDS(object = samples.merge, "~/Desktop/Covid analysis/VC start/individual donor monocyte intergration/uninfected day 3 covid healthy monocytes merged.rds") 
+
+saveRDS(object = samples.merge, "~/Desktop/Covid analysis/VC healthy covid pbmc/covid healthy monocytes merged.rds") 
+
+#saveRDS(object = samples.merge, "~/Desktop/Covid analysis/VC healthy covid pbmc/covid healthy monocytes merged no germany.rds")
+rm(covid_555_1,covid_555_2,covid_556,covid_557,covid_558,covid_559,covid_561,PBMC_10X, samples.merge,covid1,covid2,covid10,covid11,
+   covid12,covid17,covid18,covid20, HIP002,HIP015,HIP043,HIP044,HIP045,normal5,normal13,normal14,normal19,day3monocytes,plot1,plot2)
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
